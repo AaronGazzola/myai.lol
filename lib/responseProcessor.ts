@@ -69,7 +69,6 @@ export function extractCodeBlocks(text: string): CodeBlock[] {
   const blocks: CodeBlock[] = [];
   const regex = /```(\w+)?\n([\s\S]*?)\n```/g;
   let match;
-  let position = 0;
 
   while ((match = regex.exec(text)) !== null) {
     const language = match[1] || 'text';
@@ -83,7 +82,6 @@ export function extractCodeBlocks(text: string): CodeBlock[] {
       startLine,
       endLine,
     });
-    position = match.index + match[0].length;
   }
 
   return blocks;

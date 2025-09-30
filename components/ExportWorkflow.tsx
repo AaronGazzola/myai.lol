@@ -49,7 +49,7 @@ export function ExportWorkflow({
         exportAsMarkdown(exportData);
         break;
       case 'pdf':
-        exportAsPDF(exportData);
+        exportAsPDF();
         break;
       case 'csv':
         exportAsCSV(exportData);
@@ -92,7 +92,7 @@ export function ExportWorkflow({
     downloadFile(blob, `${data.name}-workflow.md`);
   };
 
-  const exportAsPDF = (data: WorkflowExportData) => {
+  const exportAsPDF = () => {
     alert('PDF export requires server-side processing. Use JSON or Markdown export for now.');
   };
 

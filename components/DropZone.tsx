@@ -126,7 +126,7 @@ export default function DropZone({
     setDraggedIndex(index);
   }, []);
 
-  const handleImageDragOver = useCallback((e: DragEvent<HTMLDivElement>, index: number) => {
+  const handleImageDragOver = useCallback((e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
   }, []);
@@ -217,7 +217,7 @@ export default function DropZone({
                 key={image.id}
                 draggable
                 onDragStart={() => handleImageDragStart(index)}
-                onDragOver={(e) => handleImageDragOver(e, index)}
+                onDragOver={(e) => handleImageDragOver(e)}
                 onDrop={(e) => handleImageDrop(e, index)}
                 className={cn(
                   "relative group rounded-lg overflow-hidden border-2 transition-all duration-200 cursor-move",

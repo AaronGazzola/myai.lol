@@ -79,8 +79,10 @@ export function createImageCache() {
     },
     set(key: string, value: string): void {
       if (cache.size >= maxSize) {
-        const firstKey = cache.keys().next().value;
-        cache.delete(firstKey);
+        const firstKey = cache.keys().next().value as string | undefined;
+        if (firstKey) {
+          cache.delete(firstKey);
+        }
       }
       cache.set(key, value);
     },
@@ -111,7 +113,7 @@ export async function lazyLoadImage(src: string): Promise<string> {
   });
 }
 
-export function debounce<T extends (...args: any[]) => any>(
+export function debounce<T extends (...args: never[]) => unknown>(
   func: T,
   wait: number
 ): (...args: Parameters<T>) => void {
@@ -130,7 +132,7 @@ export function debounce<T extends (...args: any[]) => any>(
   };
 }
 
-export function throttle<T extends (...args: any[]) => any>(
+export function throttle<T extends (...args: never[]) => unknown>(
   func: T,
   limit: number
 ): (...args: Parameters<T>) => void {
@@ -145,7 +147,7 @@ export function throttle<T extends (...args: any[]) => any>(
   };
 }
 
-export function memoize<T extends (...args: any[]) => any>(fn: T): T {
+export function memoize<T extends (...args: never[]) => unknown>(fn: T): T {
   const cache = new Map<string, ReturnType<T>>();
 
   return ((...args: Parameters<T>) => {
@@ -153,7 +155,7 @@ export function memoize<T extends (...args: any[]) => any>(fn: T): T {
     if (cache.has(key)) {
       return cache.get(key);
     }
-    const result = fn(...args);
+    const result = fn(...args) as ReturnType<T>;
     cache.set(key, result);
     return result;
   }) as T;
@@ -162,9 +164,9 @@ export function memoize<T extends (...args: any[]) => any>(fn: T): T {
 export function cleanupMemory() {
   imageCache.clear();
 
-  if (typeof window !== 'undefined' && 'gc' in window && typeof (window as any).gc === 'function') {
+  if (typeof window !== 'undefined' && 'gc' in window && typeof (window as { gc?: () => void }).gc === 'function') {
     try {
-      (window as any).gc();
+      (window as { gc: () => void }).gc();
     } catch (e) {
       console.error(JSON.stringify({ error: 'Manual GC failed', details: e }, null, 0));
     }

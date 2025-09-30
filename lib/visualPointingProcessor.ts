@@ -75,7 +75,7 @@ export const createRegionPrompt = (markups: Markup[], basePrompt: string): strin
   return `The image has been marked with the following regions of interest:\n\n${regionContext}\n\nPlease focus your analysis on these marked regions.\n\n${basePrompt}`;
 };
 
-export const processMarkedImage = (imageData: string, markups: Markup[]): string => {
+export const processMarkedImage = (imageData: string): string => {
   return imageData;
 };
 

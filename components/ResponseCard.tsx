@@ -14,8 +14,6 @@ interface ResponseCardProps {
 export default function ResponseCard({
   response,
   technique,
-  techniqueConfig,
-  onContinue,
 }: ResponseCardProps) {
   const [copied, setCopied] = useState(false);
 

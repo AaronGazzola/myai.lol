@@ -65,7 +65,7 @@ export default function MultiStepBuilder({ config, onChange }: MultiStepBuilderP
     setDraggedIndex(index);
   };
 
-  const handleDragOver = (e: DragEvent<HTMLDivElement>, index: number) => {
+  const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
   };
@@ -129,7 +129,7 @@ export default function MultiStepBuilder({ config, onChange }: MultiStepBuilderP
                 key={step.id}
                 draggable
                 onDragStart={() => handleDragStart(index)}
-                onDragOver={(e) => handleDragOver(e, index)}
+                onDragOver={(e) => handleDragOver(e)}
                 onDrop={(e) => handleDrop(e, index)}
                 className={cn(
                   "border border-gray-200 rounded-lg bg-white transition-all duration-200",

@@ -16,13 +16,14 @@ export interface AppError {
   techniqueContext?: TechniqueType;
   recoverable: boolean;
   retryable: boolean;
-  details?: any;
+  details?: unknown;
 }
 
 export class ErrorHandler {
-  static handleApiError(error: any, technique?: TechniqueType): AppError {
-    const status = error.response?.status;
-    const message = error.response?.data?.message || error.message;
+  static handleApiError(error: unknown, technique?: TechniqueType): AppError {
+    const errorObj = error as { response?: { status?: number; data?: { message?: string } }; message?: string };
+    const status = errorObj.response?.status;
+    const message = errorObj.response?.data?.message || errorObj.message;
 
     if (status === 401) {
       return {
@@ -50,7 +51,7 @@ export class ErrorHandler {
       const techniqueGuidance = this.getTechniqueGuidance(technique, message);
       return {
         type: 'api_error',
-        message: message,
+        message: message || 'Bad request',
         userMessage: techniqueGuidance || 'Invalid request. Please check your configuration.',
         techniqueContext: technique,
         recoverable: true,
@@ -58,7 +59,7 @@ export class ErrorHandler {
       };
     }
 
-    if (status >= 500) {
+    if (status && status >= 500) {
       return {
         type: 'api_error',
         message: 'Server error',
@@ -118,10 +119,10 @@ export class ErrorHandler {
     return null;
   }
 
-  static validateTechniqueConfig(technique: TechniqueType, config: any): AppError | null {
+  static validateTechniqueConfig(technique: TechniqueType, config: Record<string, unknown>): AppError | null {
     switch (technique) {
       case 'few-shot':
-        if (!config.examples || config.examples.length < 2) {
+        if (!config.examples || (Array.isArray(config.examples) && config.examples.length < 2)) {
           return {
             type: 'validation_error',
             message: 'Insufficient examples for few-shot learning',
@@ -144,7 +145,7 @@ export class ErrorHandler {
         break;
 
       case 'multi-step':
-        if (!config.steps || config.steps.length === 0) {
+        if (!config.steps || (Array.isArray(config.steps) && config.steps.length === 0)) {
           return {
             type: 'validation_error',
             message: 'No steps defined',
@@ -167,7 +168,7 @@ export class ErrorHandler {
             retryable: false
           };
         }
-        if (!config.markup || config.markup.length === 0) {
+        if (!config.markup || (Array.isArray(config.markup) && config.markup.length === 0)) {
           return {
             type: 'validation_error',
             message: 'No markup added',
@@ -180,7 +181,7 @@ export class ErrorHandler {
         break;
 
       case 'multi-image':
-        if (!config.references || config.references.length === 0) {
+        if (!config.references || (Array.isArray(config.references) && config.references.length === 0)) {
           return {
             type: 'validation_error',
             message: 'No reference images',

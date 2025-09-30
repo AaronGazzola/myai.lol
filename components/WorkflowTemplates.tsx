@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { TechniqueType, PromptCard } from '@/lib/workflowStore';
+import { PromptCard } from '@/lib/workflowStore';
 
 export interface WorkflowTemplate {
   id: string;
@@ -23,24 +23,30 @@ const BUILTIN_TEMPLATES: WorkflowTemplate[] = [
       {
         technique: 'few-shot',
         config: {
+          type: 'few-shot',
           examples: [],
-          target: null,
-          description: 'Provide 2-3 examples of images with object counts, then select your target image'
+          targetImage: '',
+          prompt: 'Provide 2-3 examples of images with object counts, then select your target image'
         },
-        assignedImages: []
+        assignedImages: [],
+        order: 0
       },
       {
         technique: 'multi-step',
         config: {
+          type: 'multi-step',
           steps: [
             'First, identify all [objects] visible in the image',
             'For each [object], count the total instances',
             'List each location and its [object] count',
             'Provide the total sum',
             'Double-check your count and verify the total'
-          ]
+          ],
+          image: '',
+          prompt: ''
         },
-        assignedImages: []
+        assignedImages: [],
+        order: 1
       }
     ]
   },
@@ -54,25 +60,32 @@ const BUILTIN_TEMPLATES: WorkflowTemplate[] = [
       {
         technique: 'multi-image',
         config: {
-          references: [],
-          target: null,
+          type: 'multi-image',
+          referenceImages: [],
+          targetImage: '',
           relationshipType: 'comparison',
-          contextDescription: 'Compare these images and identify key similarities and differences'
+          contextDescription: 'Compare these images and identify key similarities and differences',
+          prompt: ''
         },
-        assignedImages: []
+        assignedImages: [],
+        order: 0
       },
       {
         technique: 'multi-step',
         config: {
+          type: 'multi-step',
           steps: [
             'Identify the main elements present in each image',
             'Compare the common elements across all images',
             'Note the unique elements in each image',
             'Identify patterns or trends',
             'Provide a comprehensive comparison summary'
-          ]
+          ],
+          image: '',
+          prompt: ''
         },
-        assignedImages: []
+        assignedImages: [],
+        order: 1
       }
     ]
   },
@@ -86,24 +99,30 @@ const BUILTIN_TEMPLATES: WorkflowTemplate[] = [
       {
         technique: 'visual-pointing',
         config: {
-          image: null,
+          type: 'visual-pointing',
+          image: '',
           markup: [],
           prompt: 'Mark the regions you want to analyze in detail'
         },
-        assignedImages: []
+        assignedImages: [],
+        order: 0
       },
       {
         technique: 'multi-step',
         config: {
+          type: 'multi-step',
           steps: [
             'For each marked region, describe what you observe',
             'Identify any notable features or anomalies',
             'Analyze the relationship between marked regions',
             'Provide detailed findings for each region',
             'Summarize the overall inspection results'
-          ]
+          ],
+          image: '',
+          prompt: ''
         },
-        assignedImages: []
+        assignedImages: [],
+        order: 1
       }
     ]
   },
@@ -117,24 +136,30 @@ const BUILTIN_TEMPLATES: WorkflowTemplate[] = [
       {
         technique: 'few-shot',
         config: {
+          type: 'few-shot',
           examples: [],
-          target: null,
-          description: 'Provide examples of the pattern you want to recognize'
+          targetImage: '',
+          prompt: 'Provide examples of the pattern you want to recognize'
         },
-        assignedImages: []
+        assignedImages: [],
+        order: 0
       },
       {
         technique: 'multi-step',
         config: {
+          type: 'multi-step',
           steps: [
             'Review the pattern learned from the examples',
             'Identify elements in the target image that match the pattern',
             'Note any variations or exceptions',
             'Classify the target image based on the learned pattern',
             'Provide confidence level for your classification'
-          ]
+          ],
+          image: '',
+          prompt: ''
         },
-        assignedImages: []
+        assignedImages: [],
+        order: 1
       }
     ]
   },
@@ -148,19 +173,24 @@ const BUILTIN_TEMPLATES: WorkflowTemplate[] = [
       {
         technique: 'multi-image',
         config: {
-          references: [],
-          target: null,
+          type: 'multi-image',
+          referenceImages: [],
+          targetImage: '',
           relationshipType: 'reference',
-          contextDescription: 'Use the reference images as a guide for analyzing the target'
+          contextDescription: 'Use the reference images as a guide for analyzing the target',
+          prompt: ''
         },
-        assignedImages: []
+        assignedImages: [],
+        order: 0
       },
       {
         technique: 'standard',
         config: {
+          type: 'standard',
           prompt: 'Based on the reference context, provide a detailed analysis of the target image. Highlight similarities and differences.'
         },
-        assignedImages: []
+        assignedImages: [],
+        order: 1
       }
     ]
   },
@@ -174,31 +204,39 @@ const BUILTIN_TEMPLATES: WorkflowTemplate[] = [
       {
         technique: 'visual-pointing',
         config: {
-          image: null,
+          type: 'visual-pointing',
+          image: '',
           markup: [],
           prompt: 'Mark all areas that require evaluation'
         },
-        assignedImages: []
+        assignedImages: [],
+        order: 0
       },
       {
         technique: 'multi-step',
         config: {
+          type: 'multi-step',
           steps: [
             'Provide an initial overview of the entire image',
             'For each marked region, perform detailed analysis',
             'Identify relationships between different regions',
             'Assess overall quality and completeness',
             'Provide final evaluation with recommendations'
-          ]
+          ],
+          image: '',
+          prompt: ''
         },
-        assignedImages: []
+        assignedImages: [],
+        order: 1
       },
       {
         technique: 'standard',
         config: {
+          type: 'standard',
           prompt: 'Review all previous findings and provide a final comprehensive summary with confidence ratings'
         },
-        assignedImages: []
+        assignedImages: [],
+        order: 2
       }
     ]
   }
@@ -319,9 +357,9 @@ export function WorkflowTemplates({
                       </span>
                     </div>
                     <div className="text-sm text-gray-600 ml-8">
-                      {card.technique === 'multi-step' && (
+                      {card.technique === 'multi-step' && card.config.type === 'multi-step' && (
                         <ul className="list-disc list-inside space-y-1">
-                          {(card.config.steps as string[]).map((step, stepIdx) => (
+                          {card.config.steps.map((step, stepIdx) => (
                             <li key={stepIdx}>{step}</li>
                           ))}
                         </ul>
@@ -332,10 +370,10 @@ export function WorkflowTemplates({
                       {card.technique === 'visual-pointing' && (
                         <p>Mark regions of interest on the image</p>
                       )}
-                      {card.technique === 'multi-image' && (
+                      {card.technique === 'multi-image' && card.config.type === 'multi-image' && (
                         <p>{card.config.contextDescription}</p>
                       )}
-                      {card.technique === 'standard' && (
+                      {card.technique === 'standard' && card.config.type === 'standard' && (
                         <p>{card.config.prompt}</p>
                       )}
                     </div>
