@@ -2,7 +2,7 @@ type TechniqueType = 'fewShot' | 'multiStep' | 'visualPointing' | 'multiImage' |
 
 interface TechniqueConfig {
   type: TechniqueType;
-  config: any;
+  config: Record<string, unknown>;
 }
 
 interface CombinationResult {
@@ -80,17 +80,17 @@ export const orderTechniqueApplication = (techniques: TechniqueConfig[]): Techni
   return [...techniques].sort((a, b) => priority[a.type] - priority[b.type]);
 };
 
-export const mergeTechniqueConfigs = (techniques: TechniqueConfig[]): Record<string, any> => {
-  const merged: Record<string, any> = {
-    techniques: techniques.map(t => t.type),
-    configs: {}
-  };
+export const mergeTechniqueConfigs = (techniques: TechniqueConfig[]): Record<string, unknown> => {
+  const configs: Record<string, Record<string, unknown>> = {};
 
   techniques.forEach(technique => {
-    merged.configs[technique.type] = technique.config;
+    configs[technique.type] = technique.config;
   });
 
-  return merged;
+  return {
+    techniques: techniques.map(t => t.type),
+    configs
+  };
 };
 
 export const resolveTechniqueConflicts = (techniques: TechniqueConfig[]): TechniqueConfig[] => {

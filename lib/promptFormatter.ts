@@ -20,7 +20,7 @@ export interface VisualPointingConfig {
   markup: {
     type: "circle" | "rectangle" | "arrow" | "text";
     color: string;
-    data: any;
+    data: Record<string, unknown>;
   }[];
   prompt: string;
 }
@@ -130,7 +130,7 @@ export const addStructuredOutputRequest = (prompt: string, structure?: string): 
 
 export const formatPromptForTechnique = (
   technique: string,
-  config: any
+  config: FewShotConfig | MultiStepConfig | VisualPointingConfig | MultiImageConfig | { prompt?: string }
 ): string => {
   switch (technique) {
     case "few-shot":

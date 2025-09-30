@@ -68,7 +68,7 @@ export const constructMultiStepPrompt = (config: MultiStepConfig, includeVerific
     throw new Error(`Invalid multi-step configuration: ${validation.errors.join(', ')}`);
   }
 
-  let steps = [...config.steps];
+  const steps = [...config.steps];
 
   if (includeVerification && !steps.some(s => s.pattern === 'verification')) {
     steps.push(generateVerificationStep());

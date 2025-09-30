@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useEffect, MouseEvent } from "react";
+import { useRef, useState, useEffect, useCallback, MouseEvent } from "react";
 import { cn } from "@/lib/shadcn.utils";
 
 export type MarkupType = "circle" | "rectangle" | "arrow" | "text";
@@ -9,7 +9,7 @@ export interface MarkupElement {
   id: string;
   type: MarkupType;
   color: string;
-  data: any;
+  data: Record<string, unknown>;
 }
 
 export interface VisualPointingConfig {
@@ -54,75 +54,7 @@ export default function VisualPointingEditor({
 
   const selectedImage = uploadedImages.find((img) => img.id === config.imageId);
 
-  useEffect(() => {
-    if (!canvasRef.current || !selectedImage) return;
-
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    const img = new Image();
-    img.onload = () => {
-      canvas.width = img.width;
-      canvas.height = img.height;
-      ctx.drawImage(img, 0, 0);
-      setImageLoaded(true);
-      redrawMarkups();
-    };
-    img.src = selectedImage.preview;
-  }, [selectedImage]);
-
-  const redrawMarkups = () => {
-    if (!canvasRef.current || !selectedImage) return;
-
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    const img = new Image();
-    img.onload = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(img, 0, 0);
-
-      config.markups.forEach((markup) => {
-        ctx.strokeStyle = markup.color;
-        ctx.fillStyle = markup.color;
-        ctx.lineWidth = 3;
-
-        switch (markup.type) {
-          case "circle":
-            ctx.beginPath();
-            ctx.arc(markup.data.x, markup.data.y, markup.data.radius, 0, 2 * Math.PI);
-            ctx.stroke();
-            break;
-          case "rectangle":
-            ctx.strokeRect(
-              markup.data.x,
-              markup.data.y,
-              markup.data.width,
-              markup.data.height
-            );
-            break;
-          case "arrow":
-            drawArrow(
-              ctx,
-              markup.data.startX,
-              markup.data.startY,
-              markup.data.endX,
-              markup.data.endY
-            );
-            break;
-          case "text":
-            ctx.font = "20px Arial";
-            ctx.fillText(markup.data.text, markup.data.x, markup.data.y);
-            break;
-        }
-      });
-    };
-    img.src = selectedImage.preview;
-  };
-
-  const drawArrow = (
+  const drawArrow = useCallback((
     ctx: CanvasRenderingContext2D,
     fromX: number,
     fromY: number,
@@ -149,7 +81,75 @@ export default function VisualPointingEditor({
       toY - headLength * Math.sin(angle + Math.PI / 6)
     );
     ctx.stroke();
-  };
+  }, []);
+
+  const redrawMarkups = useCallback(() => {
+    if (!canvasRef.current || !selectedImage) return;
+
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const img = new Image();
+    img.onload = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0);
+
+      config.markups.forEach((markup) => {
+        ctx.strokeStyle = markup.color;
+        ctx.fillStyle = markup.color;
+        ctx.lineWidth = 3;
+
+        switch (markup.type) {
+          case "circle":
+            ctx.beginPath();
+            ctx.arc(markup.data.x as number, markup.data.y as number, markup.data.radius as number, 0, 2 * Math.PI);
+            ctx.stroke();
+            break;
+          case "rectangle":
+            ctx.strokeRect(
+              markup.data.x as number,
+              markup.data.y as number,
+              markup.data.width as number,
+              markup.data.height as number
+            );
+            break;
+          case "arrow":
+            drawArrow(
+              ctx,
+              markup.data.startX as number,
+              markup.data.startY as number,
+              markup.data.endX as number,
+              markup.data.endY as number
+            );
+            break;
+          case "text":
+            ctx.font = "20px Arial";
+            ctx.fillText(markup.data.text as string, markup.data.x as number, markup.data.y as number);
+            break;
+        }
+      });
+    };
+    img.src = selectedImage.preview;
+  }, [config.markups, selectedImage, drawArrow]);
+
+  useEffect(() => {
+    if (!canvasRef.current || !selectedImage) return;
+
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const img = new Image();
+    img.onload = () => {
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img, 0, 0);
+      setImageLoaded(true);
+      redrawMarkups();
+    };
+    img.src = selectedImage.preview;
+  }, [selectedImage, redrawMarkups]);
 
   const getCanvasCoords = (e: MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
