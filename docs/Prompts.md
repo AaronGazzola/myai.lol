@@ -20,4 +20,8 @@ The commands and numbers below are shorthand references to the corresponding pro
 
 9. `_test_doc`: "compare `docs/Test.md` with all tests in the repo and update the Test document to align with the actual tests. Each test case should be listed in a single line with an indented line below with the pass condition. The test document should include a numbered index at the top of the file, with an item for each of the tests in the repo, with the test command in the index item."
 
-10. `test_doc_fix`: "compare `docs/Test.md` with all tests in the repo and update the tests to align with the `docs/Test.md` document"
+10. `_test_doc_fix`: "compare `docs/Test.md` with all tests in the repo and update the tests to align with the `docs/Test.md` document"
+
+11. `_roadmap_continue`: "continue to follow the roadmap"
+
+12. `_roadmap_commit`: "Updte the roadmap to document the completed and remaining tasks, and push a commit"
