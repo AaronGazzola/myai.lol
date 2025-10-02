@@ -80,7 +80,7 @@ export default function PromptCard({
     if (technique === "few-shot" && !config.metadata?.fewShot) {
       newConfig.metadata = {
         ...config.metadata,
-        fewShot: { examples: [], targetImageId: null },
+        fewShot: { targetImageId: null, exampleImages: [], selectedTemplate: null },
       };
     } else if (technique === "multi-step" && !config.metadata?.multiStep) {
       newConfig.metadata = {
@@ -317,7 +317,6 @@ export default function PromptCard({
               <FewShotBuilder
                 config={config.metadata.fewShot}
                 onChange={handleFewShotChange}
-                uploadedImages={uploadedImages}
               />
             )}
 

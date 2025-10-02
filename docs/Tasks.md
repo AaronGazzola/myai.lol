@@ -1,0 +1,2 @@
+- [ ] Landing page
+- [ ] apply the markers to the images before uploading to the AI.
