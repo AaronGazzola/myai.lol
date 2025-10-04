@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner";
+import { cn } from "@/lib/shadcn.utils";
 import DropZone from "@/components/DropZone";
 import PromptCard, { PromptCardConfig, TechniqueType } from "@/components/PromptCard";
 import InsertCardButton from "@/components/InsertCardButton";
@@ -150,6 +151,48 @@ function HomeContent() {
     );
   };
 
+  const canSubmitCard = (card: PromptCardConfig) => {
+    if (card.technique === "standard") {
+      return card.prompt.length > 0 && card.assignedImages.length > 0;
+    }
+
+    if (card.technique === "few-shot" && card.metadata?.fewShot) {
+      const { targetImage, exampleImages } = card.metadata.fewShot;
+      return (
+        card.prompt.length > 0 &&
+        targetImage !== undefined &&
+        targetImage !== null &&
+        exampleImages.length > 0 &&
+        exampleImages.every(img => img.coordinates.length > 0)
+      );
+    }
+
+    if (card.technique === "visual-pointing" && card.metadata?.visualPointing) {
+      return (
+        card.metadata.visualPointing.imageId !== null &&
+        card.metadata.visualPointing.markups.length > 0
+      );
+    }
+
+    if (card.technique === "multi-image" && card.metadata?.multiImage) {
+      return (
+        card.metadata.multiImage.targetImageId !== null &&
+        card.metadata.multiImage.referenceImageIds.length > 0
+      );
+    }
+
+    return false;
+  };
+
+  const canStartSequence = () => {
+    return promptCards.some(card => canSubmitCard(card));
+  };
+
+  const handleStartSequence = () => {
+    const validCards = promptCards.filter(card => canSubmitCard(card));
+    console.log(JSON.stringify({ action: "start-sequence", validCards }, null, 0));
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -171,9 +214,38 @@ function HomeContent() {
           />
 
           <div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">
-              Prompt Workflow ({promptCards.length})
-            </h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold text-gray-900">
+                Prompt Workflow ({promptCards.length})
+              </h2>
+              <button
+                onClick={handleStartSequence}
+                disabled={!canStartSequence()}
+                className={cn(
+                  "flex items-center gap-2 px-4 py-2 text-sm rounded-lg transition-colors",
+                  canStartSequence()
+                    ? "bg-blue-600 text-white hover:bg-blue-700"
+                    : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                )}
+                title={canStartSequence() ? "Start sequence execution" : "No valid cards to execute"}
+              >
+                <span>Start sequence</span>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+              </button>
+            </div>
             <div className="space-y-4">
               {promptCards.map((card, index) => (
                 <div key={card.id}>

@@ -37,12 +37,20 @@ This roadmap details the process to refactor the image analysis interface to foc
   - Maintained card ordering and IDs properly
   - Production build validates successfully
 
+- **Phase 5**: Implement submit buttons and sequence controls ✓
+  - Added "Submit single prompt" button to each card footer
+  - Implemented validation logic for all technique types (standard, few-shot, visual-pointing, multi-image)
+  - Added "Start sequence" button to page header next to workflow title
+  - Created server actions: submitStandardPromptAction, submitFewShotPromptAction, submitVisualPointingAction, submitMultiImageAction
+  - Created submitSequenceAction for executing multiple cards in sequence
+  - Created react-query hooks for all submission types with toast notifications
+  - Production build validates successfully with zero errors
+
 ### 🔄 IN PROGRESS
 
-- **Phase 5**: Implement submit buttons and sequence controls
+- **Phase 6**: Update page layout and remove dropzone
 
 ### ⏳ REMAINING WORK
-- **Phase 5**: Implement submit buttons and sequence controls
 - **Phase 6**: Update page layout and remove dropzone
 - **Phase 7**: Production build validation
 
@@ -53,14 +61,15 @@ Current features available:
 - Few-shot learning with split layout, target image, and example images grid
 - Enhanced ImageMarkerSheet with navigation between example images
 - Insert card functionality with buttons between cards
+- Submit single prompt button in each card with validation
+- Start sequence button for executing multiple cards
 - Image dropzone at page level
 
 ### 📍 NEXT STEPS
 
-1. Implement submit single prompt button in each card
-2. Add start sequence button at workflow level
-3. Create card actions for submission processing
-4. Create card hooks for mutation management
+1. Remove global dropzone section from page
+2. Update page header layout
+3. Run final production build validation
 
 ## Prerequisites
 
@@ -264,7 +273,7 @@ Integrate insert buttons between cards:
 
 ## ✅ Phase 5: Implement Submit Buttons and Sequence Controls
 
-### ✅ 5.1 Add Submit Single Prompt Button ([components/PromptCard.tsx](components/PromptCard.tsx)) - PENDING
+### ✅ 5.1 Add Submit Single Prompt Button ([components/PromptCard.tsx](components/PromptCard.tsx)) - COMPLETED
 
 Add button to bottom-right of each card:
 
@@ -286,7 +295,7 @@ Add button to bottom-right of each card:
 - `canSubmitCard()` - Validation logic for current card state
 - `handleSubmitCard()` - Submit individual card for processing
 
-### ✅ 5.2 Add Start Sequence Button ([app/page.tsx](app/page.tsx)) - PENDING
+### ✅ 5.2 Add Start Sequence Button ([app/page.tsx](app/page.tsx)) - COMPLETED
 
 Add workflow-level control button:
 
@@ -301,7 +310,7 @@ Add workflow-level control button:
 - `canStartSequence()` - Check if any cards are valid
 - `handleStartSequence()` - Execute cards in order
 
-### ✅ 5.3 Create Card Actions ([app/page.actions.ts](app/page.actions.ts)) - PENDING
+### ✅ 5.3 Create Card Actions ([app/page.actions.ts](app/page.actions.ts)) - COMPLETED
 
 Implement server actions for submissions:
 
@@ -318,7 +327,7 @@ Implement server actions for submissions:
 - Return marked image URLs or base64
 - Include in API request to vision model
 
-### ✅ 5.4 Create Card Hooks ([app/page.hooks.ts](app/page.hooks.ts)) - PENDING
+### ✅ 5.4 Create Card Hooks ([app/page.hooks.tsx](app/page.hooks.tsx)) - COMPLETED
 
 Implement react-query hooks for submissions:
 

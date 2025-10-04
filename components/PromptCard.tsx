@@ -245,6 +245,44 @@ export default function PromptCard({
 
   const selectedTechnique = TECHNIQUES.find((t) => t.id === config.technique);
 
+  const canSubmitCard = () => {
+    if (config.technique === "standard") {
+      return config.prompt.length > 0 && config.assignedImages.length > 0;
+    }
+
+    if (config.technique === "few-shot" && config.metadata?.fewShot) {
+      const { targetImage, exampleImages } = config.metadata.fewShot;
+      return (
+        config.prompt.length > 0 &&
+        targetImage !== undefined &&
+        targetImage !== null &&
+        exampleImages.length > 0 &&
+        exampleImages.every(img => img.coordinates.length > 0)
+      );
+    }
+
+    if (config.technique === "visual-pointing" && config.metadata?.visualPointing) {
+      return (
+        config.metadata.visualPointing.imageId !== null &&
+        config.metadata.visualPointing.markups.length > 0
+      );
+    }
+
+    if (config.technique === "multi-image" && config.metadata?.multiImage) {
+      return (
+        config.metadata.multiImage.targetImageId !== null &&
+        config.metadata.multiImage.referenceImageIds.length > 0
+      );
+    }
+
+    return false;
+  };
+
+  const handleSubmitCard = () => {
+    if (!canSubmitCard()) return;
+    console.log(JSON.stringify({ action: "submit-card", config }, null, 0));
+  };
+
   return (
     <div className="border-2 border-gray-200 rounded-lg bg-white shadow-sm hover:shadow-md transition-shadow duration-200">
       <div className="p-4 border-b border-gray-200 flex items-center justify-between gap-4">
@@ -500,7 +538,7 @@ export default function PromptCard({
         </>
       )}
 
-      <div className="p-3 border-t border-gray-200 flex justify-center">
+      <div className="p-3 border-t border-gray-200 flex justify-between items-center">
         <button
           onClick={onAddBelow}
           className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
@@ -515,6 +553,28 @@ export default function PromptCard({
             />
           </svg>
           <span>Insert Card Below</span>
+        </button>
+
+        <button
+          onClick={handleSubmitCard}
+          disabled={!canSubmitCard()}
+          className={cn(
+            "flex items-center gap-2 px-4 py-2 text-sm rounded-lg transition-colors",
+            canSubmitCard()
+              ? "bg-blue-600 text-white hover:bg-blue-700"
+              : "bg-gray-100 text-gray-400 cursor-not-allowed"
+          )}
+          title={canSubmitCard() ? "Submit this prompt" : "Complete all required fields"}
+        >
+          <span>Submit single prompt</span>
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+            />
+          </svg>
         </button>
       </div>
     </div>
