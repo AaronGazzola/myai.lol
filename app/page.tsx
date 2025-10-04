@@ -99,7 +99,7 @@ function HomeContent() {
       !firstCard.metadata?.fewShot ||
       !firstCard.metadata.fewShot.exampleImages.length ||
       !firstCard.metadata.fewShot.targetImageId ||
-      !firstCard.metadata.fewShot.selectedTemplate
+      !firstCard.selectedSubCategory
     ) {
       return;
     }
@@ -128,7 +128,7 @@ function HomeContent() {
       const result = await analyzeMutation.mutateAsync({
         exampleImages: exampleImagesData,
         targetImage: targetImageBase64,
-        templateId: firstCard.metadata.fewShot.selectedTemplate,
+        templateId: firstCard.selectedSubCategory,
       });
 
       setAnalysisResult(result);
@@ -145,7 +145,7 @@ function HomeContent() {
       fewShot?.exampleImages &&
       fewShot.exampleImages.length > 0 &&
       fewShot.targetImageId !== null &&
-      fewShot.selectedTemplate !== null
+      firstCard.selectedSubCategory !== undefined
     );
   };
 
@@ -179,7 +179,6 @@ function HomeContent() {
                   key={card.id}
                   config={card}
                   onUpdate={(config) => handleCardUpdate(index, config)}
-                  onAddAbove={() => handleAddCard(index, "above")}
                   onAddBelow={() => handleAddCard(index, "below")}
                   onDelete={() => handleDeleteCard(index)}
                   uploadedImages={images}

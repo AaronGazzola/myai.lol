@@ -3,25 +3,25 @@
 import { useState } from "react";
 import { cn } from "@/lib/shadcn.utils";
 import FewShotBuilder, { FewShotConfig } from "./FewShotBuilder";
-import MultiStepBuilder, { MultiStepConfig } from "./MultiStepBuilder";
 import VisualPointingEditor, { VisualPointingConfig } from "./VisualPointingEditor";
 import MultiImageBuilder, { MultiImageConfig } from "./MultiImageBuilder";
 
 export type TechniqueType =
   | "standard"
   | "few-shot"
-  | "multi-step"
   | "visual-pointing"
   | "multi-image";
+
+export type FewShotSubCategory = "counting" | "identification" | "classification";
 
 export interface PromptCardConfig {
   id: string;
   technique: TechniqueType;
   prompt: string;
   assignedImages: string[];
+  selectedSubCategory?: FewShotSubCategory;
   metadata?: {
     fewShot?: FewShotConfig;
-    multiStep?: MultiStepConfig;
     visualPointing?: VisualPointingConfig;
     multiImage?: MultiImageConfig;
   };
@@ -30,7 +30,6 @@ export interface PromptCardConfig {
 interface PromptCardProps {
   config: PromptCardConfig;
   onUpdate: (config: PromptCardConfig) => void;
-  onAddAbove: () => void;
   onAddBelow: () => void;
   onDelete: () => void;
   uploadedImages: Array<{ id: string; preview: string; name: string }>;
@@ -41,33 +40,37 @@ const TECHNIQUES = [
     id: "standard" as TechniqueType,
     name: "Standard Prompt",
     description: "Single image with text prompt",
+    hasSubCategories: false,
   },
   {
     id: "few-shot" as TechniqueType,
     name: "Few-Shot Learning",
     description: "Examples with labels + target image",
-  },
-  {
-    id: "multi-step" as TechniqueType,
-    name: "Multi-Step Prompting",
-    description: "Sequential analysis steps",
+    hasSubCategories: true,
   },
   {
     id: "visual-pointing" as TechniqueType,
     name: "Visual Pointing",
     description: "Markup regions on image",
+    hasSubCategories: false,
   },
   {
     id: "multi-image" as TechniqueType,
     name: "Multi-Image Context",
     description: "Reference images + target",
+    hasSubCategories: false,
   },
+];
+
+const SUB_CATEGORIES: { id: FewShotSubCategory; name: string; description: string }[] = [
+  { id: "counting", name: "Object Counting", description: "Count specific objects in images" },
+  { id: "identification", name: "Object Identification", description: "Identify and list objects" },
+  { id: "classification", name: "Classification", description: "Classify images into categories" },
 ];
 
 export default function PromptCard({
   config,
   onUpdate,
-  onAddAbove,
   onAddBelow,
   onDelete,
   uploadedImages,
@@ -80,12 +83,7 @@ export default function PromptCard({
     if (technique === "few-shot" && !config.metadata?.fewShot) {
       newConfig.metadata = {
         ...config.metadata,
-        fewShot: { targetImageId: null, exampleImages: [], selectedTemplate: null },
-      };
-    } else if (technique === "multi-step" && !config.metadata?.multiStep) {
-      newConfig.metadata = {
-        ...config.metadata,
-        multiStep: { steps: [] },
+        fewShot: { targetImageId: null, exampleImages: [] },
       };
     } else if (technique === "visual-pointing" && !config.metadata?.visualPointing) {
       newConfig.metadata = {
@@ -107,6 +105,10 @@ export default function PromptCard({
     onUpdate(newConfig);
   };
 
+  const handleSubCategoryChange = (subCategory: FewShotSubCategory) => {
+    onUpdate({ ...config, selectedSubCategory: subCategory });
+  };
+
   const handlePromptChange = (prompt: string) => {
     onUpdate({ ...config, prompt });
   };
@@ -122,13 +124,6 @@ export default function PromptCard({
     onUpdate({
       ...config,
       metadata: { ...config.metadata, fewShot: fewShotConfig },
-    });
-  };
-
-  const handleMultiStepChange = (multiStepConfig: MultiStepConfig) => {
-    onUpdate({
-      ...config,
-      metadata: { ...config.metadata, multiStep: multiStepConfig },
     });
   };
 
@@ -150,10 +145,10 @@ export default function PromptCard({
 
   return (
     <div className="border-2 border-gray-200 rounded-lg bg-white shadow-sm hover:shadow-md transition-shadow duration-200">
-      <div className="p-4 border-b border-gray-200 flex items-center justify-between">
+      <div className="p-4 border-b border-gray-200 flex items-center justify-between gap-4">
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="flex items-center gap-2 text-left flex-1"
+          className="flex items-center gap-2 flex-shrink-0"
         >
           <svg
             className={cn(
@@ -171,81 +166,56 @@ export default function PromptCard({
               d="M9 5l7 7-7 7"
             />
           </svg>
-          <div>
-            <h3 className="font-medium text-gray-900">{selectedTechnique?.name}</h3>
-            <p className="text-xs text-gray-500">{selectedTechnique?.description}</p>
-          </div>
         </button>
 
-        <div className="flex items-center gap-2">
-          <button
-            onClick={onAddAbove}
-            className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded"
-            title="Add card above"
+        <div className="flex items-center gap-2 flex-1">
+          <select
+            value={config.technique}
+            onChange={(e) => handleTechniqueChange(e.target.value as TechniqueType)}
+            className="px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm font-medium"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 4v16m8-8H4"
-              />
-            </svg>
-          </button>
-          <button
-            onClick={onAddBelow}
-            className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded"
-            title="Add card below"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 4v16m8-8H4"
-              />
-            </svg>
-          </button>
-          <button
-            onClick={onDelete}
-            className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded"
-            title="Delete card"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-              />
-            </svg>
-          </button>
+            {TECHNIQUES.map((technique) => (
+              <option key={technique.id} value={technique.id}>
+                {technique.name}
+              </option>
+            ))}
+          </select>
+
+          {selectedTechnique?.hasSubCategories && (
+            <select
+              value={config.selectedSubCategory || ""}
+              onChange={(e) => handleSubCategoryChange(e.target.value as FewShotSubCategory)}
+              className="px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+            >
+              <option value="">Select sub-category...</option>
+              {SUB_CATEGORIES.map((subCat) => (
+                <option key={subCat.id} value={subCat.id}>
+                  {subCat.name}
+                </option>
+              ))}
+            </select>
+          )}
         </div>
+
+        <button
+          onClick={onDelete}
+          className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded flex-shrink-0"
+          title="Delete card"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+            />
+          </svg>
+        </button>
       </div>
 
       {isExpanded && (
         <div className="grid md:grid-cols-2 divide-x divide-gray-200">
           <div className="p-6 space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Technique
-              </label>
-              <select
-                value={config.technique}
-                onChange={(e) => handleTechniqueChange(e.target.value as TechniqueType)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                {TECHNIQUES.map((technique) => (
-                  <option key={technique.id} value={technique.id}>
-                    {technique.name}
-                  </option>
-                ))}
-              </select>
-              <p className="mt-1 text-xs text-gray-500">
-                {selectedTechnique?.description}
-              </p>
-            </div>
-
             {config.technique === "standard" && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -320,13 +290,6 @@ export default function PromptCard({
               />
             )}
 
-            {config.technique === "multi-step" && config.metadata?.multiStep && (
-              <MultiStepBuilder
-                config={config.metadata.multiStep}
-                onChange={handleMultiStepChange}
-              />
-            )}
-
             {config.technique === "visual-pointing" && config.metadata?.visualPointing && (
               <VisualPointingEditor
                 config={config.metadata.visualPointing}
@@ -345,6 +308,24 @@ export default function PromptCard({
           </div>
         </div>
       )}
+
+      <div className="p-3 border-t border-gray-200 flex justify-center">
+        <button
+          onClick={onAddBelow}
+          className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+          title="Insert card below"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 4v16m8-8H4"
+            />
+          </svg>
+          <span>Insert Card Below</span>
+        </button>
+      </div>
     </div>
   );
 }

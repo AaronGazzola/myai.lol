@@ -22,7 +22,6 @@ export interface ExampleImage {
 export interface FewShotConfig {
   targetImageId: string | null;
   exampleImages: ExampleImage[];
-  selectedTemplate: string | null;
 }
 
 interface FewShotBuilderProps {
@@ -111,13 +110,6 @@ export default function FewShotBuilder({
     });
   };
 
-  const applyTemplate = (templateId: string) => {
-    onChange({
-      ...config,
-      selectedTemplate: templateId,
-    });
-  };
-
   return (
     <div className="space-y-6">
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
@@ -126,7 +118,6 @@ export default function FewShotBuilder({
           <li>Upload 2+ images below</li>
           <li>Mark coordinates on example images</li>
           <li>Select one image as the target (to be analyzed)</li>
-          <li>Choose an analysis template</li>
         </ol>
       </div>
 
@@ -145,7 +136,7 @@ export default function FewShotBuilder({
       {config.exampleImages.length > 0 && (
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-3">
-            Step 2 & 3: Mark Coordinates & Select Target
+            Mark Coordinates & Select Target
           </label>
           <p className="text-xs text-gray-500 mb-3">
             Click images to mark target coordinates. Click the &quot;Target&quot; button to select which image to analyze.
@@ -224,30 +215,7 @@ export default function FewShotBuilder({
         />
       )}
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Step 4: Choose Analysis Template
-        </label>
-        <div className="grid grid-cols-3 gap-2">
-          {TEMPLATES.map((template) => (
-            <button
-              key={template.id}
-              onClick={() => applyTemplate(template.id)}
-              className={cn(
-                "p-3 border-2 rounded-lg text-left transition-all duration-200",
-                config.selectedTemplate === template.id
-                  ? "border-blue-500 bg-blue-50"
-                  : "border-gray-200 hover:border-gray-300"
-              )}
-            >
-              <div className="font-medium text-sm text-gray-900">{template.name}</div>
-              <div className="text-xs text-gray-500 mt-1">{template.description}</div>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {config.exampleImages.length > 0 && config.targetImageId && config.selectedTemplate && (
+      {config.exampleImages.length > 0 && config.targetImageId && (
         <div className="bg-green-50 border border-green-200 rounded-lg p-4">
           <div className="flex items-start gap-2">
             <svg
@@ -262,7 +230,7 @@ export default function FewShotBuilder({
               />
             </svg>
             <div className="text-sm text-green-700">
-              Ready to analyze! {config.exampleImages.filter(img => img.id !== config.targetImageId).length} example image{config.exampleImages.filter(img => img.id !== config.targetImageId).length !== 1 ? "s" : ""} with coordinates, 1 target image, and {TEMPLATES.find(t => t.id === config.selectedTemplate)?.name} template selected.
+              Ready to analyze! {config.exampleImages.filter(img => img.id !== config.targetImageId).length} example image{config.exampleImages.filter(img => img.id !== config.targetImageId).length !== 1 ? "s" : ""} with coordinates and 1 target image.
             </div>
           </div>
         </div>
