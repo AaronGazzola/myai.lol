@@ -20,12 +20,21 @@ This roadmap details the process to refactor the image analysis interface to foc
   - Added "Insert Card Below" button at card bottom
   - Removed duplicate technique selector from card body
 
+- **Phase 3**: Implement Few-Shot Learning split layout ✓
+  - Created two-column split layout for few-shot technique
+  - Added target image dropzone in left column below prompt textarea
+  - Added example images dropzone in right column (up to 4 images)
+  - Implemented 2x2 grid display for example images with coordinate markers
+  - Enhanced ImageMarkerSheet with next/previous navigation
+  - Added image counter display (e.g., "2 of 4")
+  - Auto-save markers when navigating between images
+  - Updated FewShotConfig to include targetImage field
+
 ### 🔄 IN PROGRESS
 
-- **Phase 3**: Implement Few-Shot Learning split layout
+- **Phase 4**: Add insert card functionality
 
 ### ⏳ REMAINING WORK
-- **Phase 3**: Implement Few-Shot Learning split layout
 - **Phase 4**: Add insert card functionality
 - **Phase 5**: Implement submit buttons and sequence controls
 - **Phase 6**: Update page layout and remove dropzone
@@ -35,15 +44,16 @@ This roadmap details the process to refactor the image analysis interface to foc
 
 Current features available:
 - Basic prompt card interface with multiple techniques
-- Few-shot learning with image upload and coordinate marking
+- Few-shot learning with split layout, target image, and example images grid
+- Enhanced ImageMarkerSheet with navigation between example images
 - Image dropzone at page level
 
 ### 📍 NEXT STEPS
 
-1. Implement split layout for few-shot technique (left: prompt + target image, right: 2x2 example images grid)
-2. Add target image dropzone below prompt textarea
-3. Implement example images grid with coordinate marking
-4. Add next/previous navigation in ImageMarkerSheet
+1. Add InsertCardButton component
+2. Update page card rendering to integrate insert buttons between cards
+3. Implement submit single prompt button in each card
+4. Add start sequence button at workflow level
 
 ## Prerequisites
 
@@ -145,7 +155,7 @@ const TECHNIQUES = [
 
 ## ✅ Phase 3: Implement Few-Shot Learning Split Layout
 
-### ✅ 3.1 Create Split Layout Structure ([components/PromptCard.tsx](components/PromptCard.tsx)) - PENDING
+### ✅ 3.1 Create Split Layout Structure ([components/PromptCard.tsx](components/PromptCard.tsx)) - COMPLETED
 
 Implement two-column layout for few-shot technique:
 
@@ -171,7 +181,7 @@ Implement two-column layout for few-shot technique:
 )}
 ```
 
-### ✅ 3.2 Implement Target Image Dropzone ([components/PromptCard.tsx](components/PromptCard.tsx)) - PENDING
+### ✅ 3.2 Implement Target Image Dropzone ([components/PromptCard.tsx](components/PromptCard.tsx)) - COMPLETED
 
 Create left-side target image upload:
 
@@ -181,7 +191,7 @@ Create left-side target image upload:
 - Store in metadata.fewShot.targetImage
 - Validate image present before enabling submit
 
-### ✅ 3.3 Implement Example Images Grid ([components/PromptCard.tsx](components/PromptCard.tsx)) - PENDING
+### ✅ 3.3 Implement Example Images Grid ([components/PromptCard.tsx](components/PromptCard.tsx)) - COMPLETED
 
 Create right-side example images grid:
 
@@ -198,7 +208,7 @@ Create right-side example images grid:
 - `handleOpenMarkerSheet(imageId)` - Opens sheet for coordinate marking
 - `handleMarkersSaved(imageId, coordinates)` - Stores marker coordinates
 
-### ✅ 3.4 Enhance ImageMarkerSheet Navigation ([components/ImageMarkerSheet.tsx](components/ImageMarkerSheet.tsx)) - PENDING
+### ✅ 3.4 Enhance ImageMarkerSheet Navigation ([components/ImageMarkerSheet.tsx](components/ImageMarkerSheet.tsx)) - COMPLETED
 
 Add next/previous navigation:
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, MouseEvent } from "react";
+import { useState, useRef, useEffect, MouseEvent } from "react";
 import {
   Sheet,
   SheetContent,
@@ -23,6 +23,9 @@ interface ImageMarkerSheetProps {
   };
   initialCoordinates: Coordinate[];
   onSave: (coordinates: Coordinate[]) => void;
+  onNavigate?: (direction: 'next' | 'prev') => void;
+  currentIndex?: number;
+  totalImages?: number;
 }
 
 export default function ImageMarkerSheet({
@@ -31,9 +34,16 @@ export default function ImageMarkerSheet({
   image,
   initialCoordinates,
   onSave,
+  onNavigate,
+  currentIndex,
+  totalImages,
 }: ImageMarkerSheetProps) {
   const [coordinates, setCoordinates] = useState<Coordinate[]>(initialCoordinates);
   const imageRef = useRef<HTMLImageElement>(null);
+
+  useEffect(() => {
+    setCoordinates(initialCoordinates);
+  }, [initialCoordinates, image.id]);
 
   const handleImageClick = (e: MouseEvent<HTMLDivElement>) => {
     if (!imageRef.current) return;
@@ -60,10 +70,25 @@ export default function ImageMarkerSheet({
     onClose();
   };
 
+  const handleNavigate = (direction: 'next' | 'prev') => {
+    if (!onNavigate) return;
+    onSave(coordinates);
+    onNavigate(direction);
+  };
+
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && handleCancel()}>
       <SheetContent side="right" className="w-full sm:max-w-4xl">
-        <SheetTitle>{image.name}</SheetTitle>
+        <div className="flex items-center justify-between">
+          <SheetTitle>{image.name}</SheetTitle>
+          {onNavigate && typeof currentIndex === 'number' && typeof totalImages === 'number' && (
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-500">
+                {currentIndex + 1} of {totalImages}
+              </span>
+            </div>
+          )}
+        </div>
         <div className="flex flex-col h-full pt-2">
           <div className="mb-4">
             <p className="text-sm text-gray-500">
@@ -71,7 +96,18 @@ export default function ImageMarkerSheet({
             </p>
           </div>
 
-          <div className="flex-1 overflow-auto mb-4">
+          <div className="flex-1 overflow-auto mb-4 relative">
+            {onNavigate && typeof currentIndex === 'number' && currentIndex > 0 && (
+              <button
+                onClick={() => handleNavigate('prev')}
+                className="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white rounded-full shadow-lg hover:bg-gray-100 transition-colors"
+              >
+                <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+            )}
+
             <div
               className="relative inline-block cursor-crosshair"
               onClick={handleImageClick}
@@ -96,6 +132,17 @@ export default function ImageMarkerSheet({
                 </button>
               ))}
             </div>
+
+            {onNavigate && typeof currentIndex === 'number' && typeof totalImages === 'number' && currentIndex < totalImages - 1 && (
+              <button
+                onClick={() => handleNavigate('next')}
+                className="absolute right-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white rounded-full shadow-lg hover:bg-gray-100 transition-colors"
+              >
+                <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            )}
           </div>
 
           <SheetFooter>

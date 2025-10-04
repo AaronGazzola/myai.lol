@@ -21,6 +21,7 @@ export interface ExampleImage {
 
 export interface FewShotConfig {
   targetImageId: string | null;
+  targetImage?: ExampleImage;
   exampleImages: ExampleImage[];
 }
 
