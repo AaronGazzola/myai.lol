@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner";
 import DropZone from "@/components/DropZone";
 import PromptCard, { PromptCardConfig, TechniqueType } from "@/components/PromptCard";
+import InsertCardButton from "@/components/InsertCardButton";
 import { useAnalyzeFewShot } from "./page.hooks";
 import { encodeImageToBase64 } from "@/lib/openrouter";
 import { AnalysisResult } from "./page.actions";
@@ -175,14 +176,18 @@ function HomeContent() {
             </h2>
             <div className="space-y-4">
               {promptCards.map((card, index) => (
-                <PromptCard
-                  key={card.id}
-                  config={card}
-                  onUpdate={(config) => handleCardUpdate(index, config)}
-                  onAddBelow={() => handleAddCard(index, "below")}
-                  onDelete={() => handleDeleteCard(index)}
-                  uploadedImages={images}
-                />
+                <div key={card.id}>
+                  <PromptCard
+                    config={card}
+                    onUpdate={(config) => handleCardUpdate(index, config)}
+                    onAddBelow={() => handleAddCard(index, "below")}
+                    onDelete={() => handleDeleteCard(index)}
+                    uploadedImages={images}
+                  />
+                  {index < promptCards.length - 1 && (
+                    <InsertCardButton onClick={() => handleAddCard(index, "below")} />
+                  )}
+                </div>
               ))}
 
               {canAnalyze() && (

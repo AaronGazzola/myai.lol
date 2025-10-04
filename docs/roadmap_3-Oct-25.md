@@ -30,12 +30,18 @@ This roadmap details the process to refactor the image analysis interface to foc
   - Auto-save markers when navigating between images
   - Updated FewShotConfig to include targetImage field
 
+- **Phase 4**: Add insert card functionality ✓
+  - Created InsertCardButton component with centered plus icon
+  - Integrated insert buttons between cards on page
+  - Wired up to handleAddCard function with correct index
+  - Maintained card ordering and IDs properly
+  - Production build validates successfully
+
 ### 🔄 IN PROGRESS
 
-- **Phase 4**: Add insert card functionality
+- **Phase 5**: Implement submit buttons and sequence controls
 
 ### ⏳ REMAINING WORK
-- **Phase 4**: Add insert card functionality
 - **Phase 5**: Implement submit buttons and sequence controls
 - **Phase 6**: Update page layout and remove dropzone
 - **Phase 7**: Production build validation
@@ -46,14 +52,15 @@ Current features available:
 - Basic prompt card interface with multiple techniques
 - Few-shot learning with split layout, target image, and example images grid
 - Enhanced ImageMarkerSheet with navigation between example images
+- Insert card functionality with buttons between cards
 - Image dropzone at page level
 
 ### 📍 NEXT STEPS
 
-1. Add InsertCardButton component
-2. Update page card rendering to integrate insert buttons between cards
-3. Implement submit single prompt button in each card
-4. Add start sequence button at workflow level
+1. Implement submit single prompt button in each card
+2. Add start sequence button at workflow level
+3. Create card actions for submission processing
+4. Create card hooks for mutation management
 
 ## Prerequisites
 
@@ -227,7 +234,7 @@ Add next/previous navigation:
 
 ## ✅ Phase 4: Add Insert Card Functionality
 
-### ✅ 4.1 Create InsertCardButton Component ([components/InsertCardButton.tsx](components/InsertCardButton.tsx)) - PENDING
+### ✅ 4.1 Create InsertCardButton Component ([components/InsertCardButton.tsx](components/InsertCardButton.tsx)) - COMPLETED
 
 Create reusable button component:
 
@@ -246,7 +253,7 @@ interface InsertCardButtonProps {
 export default function InsertCardButton({ onClick }: InsertCardButtonProps)
 ```
 
-### ✅ 4.2 Update Page Card Rendering ([app/page.tsx](app/page.tsx)) - PENDING
+### ✅ 4.2 Update Page Card Rendering ([app/page.tsx](app/page.tsx)) - COMPLETED
 
 Integrate insert buttons between cards:
 
