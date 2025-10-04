@@ -34,7 +34,6 @@ interface PromptCardProps {
   onUpdate: (config: PromptCardConfig) => void;
   onAddBelow: () => void;
   onDelete: () => void;
-  uploadedImages: Array<{ id: string; preview: string; name: string }>;
 }
 
 const TECHNIQUES = [
@@ -75,7 +74,6 @@ export default function PromptCard({
   onUpdate,
   onAddBelow,
   onDelete,
-  uploadedImages,
 }: PromptCardProps) {
   const [isExpanded, setIsExpanded] = useState(true);
   const [markerSheetOpen, setMarkerSheetOpen] = useState(false);
@@ -92,7 +90,7 @@ export default function PromptCard({
     } else if (technique === "visual-pointing" && !config.metadata?.visualPointing) {
       newConfig.metadata = {
         ...config.metadata,
-        visualPointing: { imageId: null, markups: [] },
+        visualPointing: { imageId: null, image: null, markups: [] },
       };
     } else if (technique === "multi-image" && !config.metadata?.multiImage) {
       newConfig.metadata = {
@@ -115,13 +113,6 @@ export default function PromptCard({
 
   const handlePromptChange = (prompt: string) => {
     onUpdate({ ...config, prompt });
-  };
-
-  const handleImageSelect = (imageId: string) => {
-    const assigned = config.assignedImages.includes(imageId)
-      ? config.assignedImages.filter((id) => id !== imageId)
-      : [...config.assignedImages, imageId];
-    onUpdate({ ...config, assignedImages: assigned });
   };
 
   const handleVisualPointingChange = (visualPointingConfig: VisualPointingConfig) => {
@@ -434,52 +425,6 @@ export default function PromptCard({
           ) : (
             <div className="grid md:grid-cols-2 divide-x divide-gray-200">
               <div className="p-6 space-y-4">
-                {config.technique === "standard" && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Assigned Images ({config.assignedImages.length})
-                    </label>
-                    {uploadedImages.length === 0 ? (
-                      <p className="text-sm text-gray-500 italic">No images uploaded yet</p>
-                    ) : (
-                      <div className="grid grid-cols-3 gap-2">
-                        {uploadedImages.map((image) => (
-                          <button
-                            key={image.id}
-                            onClick={() => handleImageSelect(image.id)}
-                            className={cn(
-                              "relative aspect-square rounded-lg overflow-hidden border-2 transition-all duration-200",
-                              config.assignedImages.includes(image.id)
-                                ? "border-blue-500 ring-2 ring-blue-200"
-                                : "border-gray-200 hover:border-gray-300"
-                            )}
-                          >
-                            <img
-                              src={image.preview}
-                              alt={image.name}
-                              className="w-full h-full object-cover"
-                            />
-                            {config.assignedImages.includes(image.id) && (
-                              <div className="absolute inset-0 bg-blue-500 bg-opacity-20 flex items-center justify-center">
-                                <svg
-                                  className="w-6 h-6 text-blue-600"
-                                  fill="currentColor"
-                                  viewBox="0 0 20 20"
-                                >
-                                  <path
-                                    fillRule="evenodd"
-                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                    clipRule="evenodd"
-                                  />
-                                </svg>
-                              </div>
-                            )}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                )}
               </div>
 
               <div className="p-6">
@@ -505,7 +450,6 @@ export default function PromptCard({
                   <VisualPointingEditor
                     config={config.metadata.visualPointing}
                     onChange={handleVisualPointingChange}
-                    uploadedImages={uploadedImages}
                   />
                 )}
 
@@ -513,7 +457,6 @@ export default function PromptCard({
                   <MultiImageBuilder
                     config={config.metadata.multiImage}
                     onChange={handleMultiImageChange}
-                    uploadedImages={uploadedImages}
                   />
                 )}
               </div>

@@ -4,7 +4,6 @@ import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner";
 import { cn } from "@/lib/shadcn.utils";
-import DropZone from "@/components/DropZone";
 import PromptCard, { PromptCardConfig, TechniqueType } from "@/components/PromptCard";
 import InsertCardButton from "@/components/InsertCardButton";
 import { useAnalyzeFewShot } from "./page.hooks";
@@ -13,16 +12,7 @@ import { AnalysisResult } from "./page.actions";
 
 const queryClient = new QueryClient();
 
-interface UploadedImage {
-  id: string;
-  file: File;
-  preview: string;
-  name: string;
-  size: number;
-}
-
 function HomeContent() {
-  const [images, setImages] = useState<UploadedImage[]>([]);
   const [promptCards, setPromptCards] = useState<PromptCardConfig[]>([
     {
       id: `card-${Date.now()}`,
@@ -34,36 +24,6 @@ function HomeContent() {
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
 
   const analyzeMutation = useAnalyzeFewShot();
-
-  const handleImagesUploaded = (newImages: UploadedImage[]) => {
-    setImages((prev) => [...prev, ...newImages]);
-  };
-
-  const handleRemoveImage = (id: string) => {
-    setImages((prev) => {
-      const image = prev.find((img) => img.id === id);
-      if (image) {
-        URL.revokeObjectURL(image.preview);
-      }
-      return prev.filter((img) => img.id !== id);
-    });
-
-    setPromptCards((prev) =>
-      prev.map((card) => ({
-        ...card,
-        assignedImages: card.assignedImages.filter((imgId) => imgId !== id),
-      }))
-    );
-  };
-
-  const handleReorderImages = (fromIndex: number, toIndex: number) => {
-    setImages((prev) => {
-      const newImages = [...prev];
-      const [removed] = newImages.splice(fromIndex, 1);
-      newImages.splice(toIndex, 0, removed);
-      return newImages;
-    });
-  };
 
   const handleCardUpdate = (index: number, config: PromptCardConfig) => {
     setPromptCards((prev) => {
@@ -196,27 +156,11 @@ function HomeContent() {
   return (
     <div className="min-h-screen bg-gray-50">
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
-            AI Image Analysis Workflow
-          </h1>
-          <p className="mt-2 text-gray-600">
-            Upload images and configure advanced prompt engineering techniques
-          </p>
-        </div>
-
         <div className="space-y-8">
-          <DropZone
-            onImagesUploaded={handleImagesUploaded}
-            uploadedImages={images}
-            onRemoveImage={handleRemoveImage}
-            onReorderImages={handleReorderImages}
-          />
-
           <div>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-semibold text-gray-900">
-                Prompt Workflow ({promptCards.length})
+                Prompt Workflow
               </h2>
               <button
                 onClick={handleStartSequence}
@@ -254,7 +198,6 @@ function HomeContent() {
                     onUpdate={(config) => handleCardUpdate(index, config)}
                     onAddBelow={() => handleAddCard(index, "below")}
                     onDelete={() => handleDeleteCard(index)}
-                    uploadedImages={images}
                   />
                   {index < promptCards.length - 1 && (
                     <InsertCardButton onClick={() => handleAddCard(index, "below")} />

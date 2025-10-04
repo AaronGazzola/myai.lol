@@ -2,6 +2,7 @@
 
 import { useRef, useState, useEffect, useCallback, MouseEvent } from "react";
 import { cn } from "@/lib/shadcn.utils";
+import DropZone from "./DropZone";
 
 export type MarkupType = "circle" | "rectangle" | "arrow" | "text";
 
@@ -12,15 +13,23 @@ export interface MarkupElement {
   data: Record<string, unknown>;
 }
 
+interface UploadedImage {
+  id: string;
+  file: File;
+  preview: string;
+  name: string;
+  size: number;
+}
+
 export interface VisualPointingConfig {
   imageId: string | null;
+  image: UploadedImage | null;
   markups: MarkupElement[];
 }
 
 interface VisualPointingEditorProps {
   config: VisualPointingConfig;
   onChange: (config: VisualPointingConfig) => void;
-  uploadedImages: Array<{ id: string; preview: string; name: string }>;
 }
 
 const COLORS = [
@@ -42,7 +51,6 @@ const TOOLS: Array<{ id: MarkupType; name: string; icon: string }> = [
 export default function VisualPointingEditor({
   config,
   onChange,
-  uploadedImages,
 }: VisualPointingEditorProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -52,7 +60,29 @@ export default function VisualPointingEditor({
   const [startPoint, setStartPoint] = useState<{ x: number; y: number } | null>(null);
   const [imageLoaded, setImageLoaded] = useState(false);
 
-  const selectedImage = uploadedImages.find((img) => img.id === config.imageId);
+  const selectedImage = config.image;
+
+  const handleImageUpload = (newImages: UploadedImage[]) => {
+    if (newImages.length > 0) {
+      const uploadedImage = newImages[0];
+      onChange({
+        ...config,
+        imageId: uploadedImage.id,
+        image: uploadedImage,
+      });
+    }
+  };
+
+  const handleRemoveImage = () => {
+    onChange({
+      ...config,
+      imageId: null,
+      image: null,
+      markups: [],
+    });
+  };
+
+  const handleReorderImages = () => {};
 
   const drawArrow = useCallback((
     ctx: CanvasRenderingContext2D,
@@ -255,14 +285,6 @@ export default function VisualPointingEditor({
     setTimeout(redrawMarkups, 0);
   };
 
-  const selectImage = (imageId: string) => {
-    onChange({
-      imageId: config.imageId === imageId ? null : imageId,
-      markups: [],
-    });
-    setImageLoaded(false);
-  };
-
   return (
     <div className="space-y-6">
       <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
@@ -274,35 +296,14 @@ export default function VisualPointingEditor({
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-3">
-          Select Image to Annotate
+          Upload Image to Annotate
         </label>
-        {uploadedImages.length === 0 ? (
-          <p className="text-sm text-gray-500 italic">No images uploaded yet</p>
-        ) : (
-          <div className="grid grid-cols-4 gap-3">
-            {uploadedImages.map((image) => (
-              <button
-                key={image.id}
-                onClick={() => selectImage(image.id)}
-                className={cn(
-                  "relative aspect-square rounded-lg overflow-hidden border-2 transition-all duration-200",
-                  config.imageId === image.id
-                    ? "border-orange-500 ring-2 ring-orange-200"
-                    : "border-gray-200 hover:border-gray-300"
-                )}
-              >
-                <img
-                  src={image.preview}
-                  alt={image.name}
-                  className="w-full h-full object-cover"
-                />
-                {config.imageId === image.id && (
-                  <div className="absolute inset-0 bg-orange-500 bg-opacity-20" />
-                )}
-              </button>
-            ))}
-          </div>
-        )}
+        <DropZone
+          onImagesUploaded={handleImageUpload}
+          uploadedImages={config.image ? [config.image] : []}
+          onRemoveImage={handleRemoveImage}
+          onReorderImages={handleReorderImages}
+        />
       </div>
 
       {config.imageId && selectedImage && (

@@ -14,7 +14,6 @@ export interface MultiImageConfig {
 interface MultiImageBuilderProps {
   config: MultiImageConfig;
   onChange: (config: MultiImageConfig) => void;
-  uploadedImages: Array<{ id: string; preview: string; name: string }>;
 }
 
 const RELATIONSHIP_TYPES: Array<{
@@ -52,7 +51,6 @@ const RELATIONSHIP_TYPES: Array<{
 export default function MultiImageBuilder({
   config,
   onChange,
-  uploadedImages,
 }: MultiImageBuilderProps) {
   const toggleReferenceImage = (imageId: string) => {
     const references = config.referenceImageIds.includes(imageId)
@@ -78,14 +76,6 @@ export default function MultiImageBuilder({
 
   const selectedRelationship = RELATIONSHIP_TYPES.find(
     (r) => r.id === config.relationshipType
-  );
-
-  const availableForTarget = uploadedImages.filter(
-    (img) => !config.referenceImageIds.includes(img.id)
-  );
-
-  const availableForReference = uploadedImages.filter(
-    (img) => config.targetImageId !== img.id
   );
 
   return (
@@ -128,91 +118,20 @@ export default function MultiImageBuilder({
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-3">
-          Reference Images ({config.referenceImageIds.length})
+          Reference Images
         </label>
-        <p className="text-xs text-gray-500 mb-3">
-          Select 1-3 images to provide as reference/context
+        <p className="text-sm text-gray-500 italic">
+          Multi-image functionality requires dropzone implementation
         </p>
-        {uploadedImages.length === 0 ? (
-          <p className="text-sm text-gray-500 italic">No images uploaded yet</p>
-        ) : (
-          <div className="grid grid-cols-4 gap-3">
-            {availableForReference.map((image) => (
-              <button
-                key={image.id}
-                onClick={() => toggleReferenceImage(image.id)}
-                disabled={
-                  config.referenceImageIds.length >= 3 &&
-                  !config.referenceImageIds.includes(image.id)
-                }
-                className={cn(
-                  "relative aspect-square rounded-lg overflow-hidden border-2 transition-all duration-200",
-                  config.referenceImageIds.includes(image.id)
-                    ? "border-teal-500 ring-2 ring-teal-200"
-                    : "border-gray-200 hover:border-gray-300",
-                  config.referenceImageIds.length >= 3 &&
-                    !config.referenceImageIds.includes(image.id) &&
-                    "opacity-50 cursor-not-allowed"
-                )}
-              >
-                <img
-                  src={image.preview}
-                  alt={image.name}
-                  className="w-full h-full object-cover"
-                />
-                {config.referenceImageIds.includes(image.id) && (
-                  <div className="absolute inset-0 bg-teal-500 bg-opacity-20 flex items-center justify-center">
-                    <div className="bg-teal-600 text-white text-xs font-medium px-2 py-1 rounded">
-                      Ref {config.referenceImageIds.indexOf(image.id) + 1}
-                    </div>
-                  </div>
-                )}
-              </button>
-            ))}
-          </div>
-        )}
       </div>
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-3">
           Target Image
         </label>
-        <p className="text-xs text-gray-500 mb-3">
-          Select the image to analyze using the reference images as context
+        <p className="text-sm text-gray-500 italic">
+          Multi-image functionality requires dropzone implementation
         </p>
-        {availableForTarget.length === 0 ? (
-          <p className="text-sm text-gray-500 italic">
-            No images available (all assigned as references)
-          </p>
-        ) : (
-          <div className="grid grid-cols-4 gap-3">
-            {availableForTarget.map((image) => (
-              <button
-                key={image.id}
-                onClick={() => setTargetImage(image.id)}
-                className={cn(
-                  "relative aspect-square rounded-lg overflow-hidden border-2 transition-all duration-200",
-                  config.targetImageId === image.id
-                    ? "border-green-500 ring-2 ring-green-200"
-                    : "border-gray-200 hover:border-gray-300"
-                )}
-              >
-                <img
-                  src={image.preview}
-                  alt={image.name}
-                  className="w-full h-full object-cover"
-                />
-                {config.targetImageId === image.id && (
-                  <div className="absolute inset-0 bg-green-500 bg-opacity-20 flex items-center justify-center">
-                    <div className="bg-green-600 text-white text-xs font-medium px-2 py-1 rounded">
-                      Target
-                    </div>
-                  </div>
-                )}
-              </button>
-            ))}
-          </div>
-        )}
       </div>
 
       <div>
